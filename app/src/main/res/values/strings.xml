@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">UtilityApp</string>
+
+    <string name="facebook_app_id">1035148903502599</string>
+    <string name="fb_login_protocol_scheme">fb1035148903502599</string>
+
+    <string name="fb_native_ad">1035148903502599_1035154756835347</string>
+
+    <!--TEST-->
+    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="banner_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="native_id">ca-app-pub-3940256099942544/2247696110</string>
+    <string name="splash_enter_id">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="main_exit_id">ca-app-pub-3940256099942544/1033173712</string>
+
+    <!--REAL-->
+
+</resources>
