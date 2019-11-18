@@ -10,6 +10,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.webkit.URLUtil
+import com.facebook.ads.BuildConfig
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.InterstitialAd
 import im.delight.android.webview.AdvancedWebView
 import kotlinx.android.synthetic.main.activity_web_view.*
 import kotlinx.android.synthetic.main.snippet_toolbar_inner.*
@@ -18,12 +22,26 @@ class WebViewActivity : AppCompatActivity() {
     val TAG = "WebViewActivity"
     var url =""
     var title = ""
+    private lateinit var mInterstitialAd: InterstitialAd
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_web_view)
+        mInterstitialAd = InterstitialAd(this)
+        mInterstitialAd.adUnitId = getString(R.string.main_exit_id)
+        mInterstitialAd.loadAd(AdRequest.Builder().build())
+
+        mInterstitialAd.adListener = object : AdListener(){
+            override fun onAdClosed() {
+                super.onAdClosed()
+                finish()
+            }
+        }
+
+
         title = intent!!.getStringExtra("title")
         url = intent!!.getStringExtra("url")
-        backArrow.setOnClickListener { finish() }
+        backArrow.setOnClickListener { onBackPressed() }
         toolbarTitle.text = title
 
         advWebView.setListener(this,object : AdvancedWebView.Listener{
@@ -92,5 +110,12 @@ class WebViewActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         super.onActivityResult(requestCode, resultCode, intent)
         advWebView.onActivityResult(requestCode, resultCode, intent)
+    }
+
+    override fun onBackPressed() {
+        if(mInterstitialAd.isLoaded)
+            mInterstitialAd.show()
+        else
+            finish()
     }
 }
