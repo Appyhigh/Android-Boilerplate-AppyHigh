@@ -24,9 +24,9 @@ import java.util.*
 
 class NotificationService : FirebaseMessagingService() {
     val TAG = "NotificationService"
-    lateinit var bitmap : Bitmap
+    lateinit var bitmap: Bitmap
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        try{
+        try {
             if (remoteMessage.data.isNotEmpty()) {
                 Log.d(TAG, "Message data payload: " + remoteMessage.data)
             }
@@ -56,14 +56,21 @@ class NotificationService : FirebaseMessagingService() {
             if (message == null || message.isEmpty()) {
                 return
             }
-            sendNotification(title,message,subtext,bitmap,which,link)
-        }catch (e : Exception){
+            sendNotification(title, message, subtext, bitmap, which, link)
+        } catch (e: Exception) {
 
         }
 
     }
 
-    private fun sendNotification(title: String, message: String, subtext: String, image: Bitmap, which: String, link: String) {
+    private fun sendNotification(
+        title: String,
+        message: String,
+        subtext: String,
+        image: Bitmap,
+        which: String,
+        link: String
+    ) {
         try {
             Log.i("Result", "Got the data yessss")
 

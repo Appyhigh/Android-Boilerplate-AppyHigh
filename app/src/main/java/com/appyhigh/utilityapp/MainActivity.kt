@@ -1,5 +1,6 @@
 package com.appyhigh.utilityapp
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -101,24 +102,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun inflateFbAdView(nativeAd: NativeAd){
         nativeAd.unregisterView()
-        var cardView = LayoutInflater.from(this).inflate(R.layout.item_fb_nativead, null) as CardView
+        val cardView = LayoutInflater.from(this).inflate(R.layout.item_fb_nativead, null) as CardView
         nativeAdFb.addView(cardView)
 
         val nativeAdLayout = cardView.native_ad_container as NativeAdLayout
 
         // Add the AdOptionsView
-        var adChoicesContainer = cardView.ad_choices_container as LinearLayout
-        var adOptionsView = AdOptionsView(this@MainActivity, nativeAd, nativeAdLayout)
+        val adChoicesContainer = cardView.ad_choices_container as LinearLayout
+        val adOptionsView = AdOptionsView(this@MainActivity, nativeAd, nativeAdLayout)
         adChoicesContainer.removeAllViews()
         adChoicesContainer.addView(adOptionsView, 0)
 
-        var nativeAdIcon = cardView.native_ad_icon as AdIconView
-        var nativeAdTitle = cardView.native_ad_title as TextView
-        var nativeAdMedia = cardView.native_ad_media as MediaView
-        var nativeAdSocialContext = cardView.native_ad_social_context as TextView
-        var nativeAdBody = cardView.native_ad_body as TextView
-        var sponsoredLabel = cardView.native_ad_sponsored_label as TextView
-        var nativeAdCallToAction = cardView.native_ad_call_to_action as Button
+        val nativeAdIcon = cardView.native_ad_icon as AdIconView
+        val nativeAdTitle = cardView.native_ad_title as TextView
+        val nativeAdMedia = cardView.native_ad_media as MediaView
+        val nativeAdSocialContext = cardView.native_ad_social_context as TextView
+        val nativeAdBody = cardView.native_ad_body as TextView
+        val sponsoredLabel = cardView.native_ad_sponsored_label as TextView
+        val nativeAdCallToAction = cardView.native_ad_call_to_action as Button
 
         nativeAdTitle.text = nativeAd.advertiserName
         nativeAdBody.text = nativeAd.adBodyText
@@ -136,9 +137,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkForNotifications(){
         try {
-            var which = intent.getStringExtra("which")
-            var link = intent.getStringExtra("link")
-            var title = intent.getStringExtra("title")
+            val which = intent.getStringExtra("which")
+            val link = intent.getStringExtra("link")
+            val title = intent.getStringExtra("title")
 
             when(which){
                 "P"->{
@@ -168,7 +169,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 "L"->{
-                    var i = Intent(this, WebViewActivity::class.java)
+                    val i = Intent(this, WebViewActivity::class.java)
                     i.putExtra("url", link)
                     i.putExtra("title", title)
                     startActivity(i)
@@ -238,7 +239,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun populateUnifiedNativeAdView(nativeAd: UnifiedNativeAd, adView: UnifiedNativeAdView) {
-        var iconView = adView.ad_icon as ImageView
+        val iconView = adView.ad_icon as ImageView
         Log.e("nativead", "ad body : " + nativeAd.body)
 
         val icon = nativeAd.icon
@@ -311,7 +312,7 @@ class MainActivity : AppCompatActivity() {
                 times = (sharedPrefUtil.getInt(Constants.TIMES, 0) + 1) % 5
                 sharedPrefUtil.saveInt(Constants.TIMES,times)
                 if(times==0){
-                    var rateDialog = RateDialog()
+                    val rateDialog = RateDialog()
                     rateDialog.show(supportFragmentManager,"RATEDIALOG")
                 }
             }
@@ -330,6 +331,7 @@ class MainActivity : AppCompatActivity() {
         startActivity(sendIntent)
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.popup_menu, menu)
@@ -346,7 +348,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.rateUs -> {
-                var rateDialog = RateDialog()
+                val rateDialog = RateDialog()
                 rateDialog.show(supportFragmentManager,"RATEDIALOG")
                 true
             }

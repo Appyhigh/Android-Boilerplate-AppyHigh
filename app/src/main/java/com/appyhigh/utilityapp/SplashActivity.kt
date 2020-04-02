@@ -2,10 +2,10 @@ package com.appyhigh.utilityapp
 
 import android.content.Intent
 import android.content.IntentSender
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
+import androidx.appcompat.app.AppCompatActivity
 import com.appyhigh.utilityapp.Utils.SharedPrefUtil
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
@@ -24,14 +24,17 @@ class SplashActivity : AppCompatActivity() {
     lateinit var sharedPrefUtil: SharedPrefUtil
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        )
         setContentView(R.layout.activity_splash)
 
         sharedPrefUtil = SharedPrefUtil(this)
         mInterstitialAd = InterstitialAd(this)
         mInterstitialAd.adUnitId = getString(R.string.splash_enter_id)
 
-        mInterstitialAd.adListener = object : AdListener(){
+        mInterstitialAd.adListener = object : AdListener() {
             override fun onAdClosed() {
                 super.onAdClosed()
                 checkForLatestVersion()
@@ -50,8 +53,8 @@ class SplashActivity : AppCompatActivity() {
         getRemoteConfig()
     }
 
-    private fun getRemoteConfig(){
-        var remoteConfig = FirebaseRemoteConfig.getInstance()
+    private fun getRemoteConfig() {
+        val remoteConfig = FirebaseRemoteConfig.getInstance()
         val configSettings = FirebaseRemoteConfigSettings.Builder()
             .setMinimumFetchIntervalInSeconds(420)
             .build()
@@ -64,18 +67,16 @@ class SplashActivity : AppCompatActivity() {
                     val updated = task.result
                     Log.d(TAG, "Config params updated: $updated")
                     remoteConfig.activate()
-                } else {
-
                 }
                 showAdsString = remoteConfig.getString("display_ads")
                 showAds = showAdsString == "yes"
                 Log.e(TAG, "getRemoteConfig: $showAds")
                 Log.e(TAG, "getRemoteConfig: $showAdsString")
-                sharedPrefUtil.saveBoolean("ADS",showAds)
-                if(showAds){
+                sharedPrefUtil.saveBoolean("ADS", showAds)
+                if (showAds) {
                     Log.e(TAG, "getRemoteConfig: SHOW")
                     mInterstitialAd.loadAd(AdRequest.Builder().build())
-                }else{
+                } else {
                     Log.e(TAG, "getRemoteConfig: DO NOT SHOW")
                     checkForLatestVersion()
                 }
@@ -83,8 +84,8 @@ class SplashActivity : AppCompatActivity() {
     }
 
 
-    fun nextActivity(){
-        startActivity(Intent(this@SplashActivity,MainActivity::class.java))
+    fun nextActivity() {
+        startActivity(Intent(this@SplashActivity, MainActivity::class.java))
         finish()
     }
 

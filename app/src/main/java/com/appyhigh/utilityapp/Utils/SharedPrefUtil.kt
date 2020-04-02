@@ -30,7 +30,7 @@ class SharedPrefUtil(private val mContext: Context) {
         mSharedPreferences = mContext.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
         mEditor = mSharedPreferences!!.edit()
         mEditor!!.putString(key, value)
-        mEditor!!.commit()
+        mEditor!!.apply()
     }
 
     /**
@@ -43,7 +43,7 @@ class SharedPrefUtil(private val mContext: Context) {
         mSharedPreferences = mContext.getSharedPreferences(APP_PREFS, Context.MODE_PRIVATE)
         mEditor = mSharedPreferences!!.edit()
         mEditor!!.putInt(key, value)
-        mEditor!!.commit()
+        mEditor!!.apply()
     }
 
     /**

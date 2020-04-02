@@ -5,12 +5,11 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.webkit.URLUtil
-import com.facebook.ads.BuildConfig
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.InterstitialAd
@@ -20,7 +19,7 @@ import kotlinx.android.synthetic.main.snippet_toolbar_inner.*
 
 class WebViewActivity : AppCompatActivity() {
     val TAG = "WebViewActivity"
-    var url =""
+    var url = ""
     var title = ""
     private lateinit var mInterstitialAd: InterstitialAd
 
@@ -30,21 +29,18 @@ class WebViewActivity : AppCompatActivity() {
         mInterstitialAd = InterstitialAd(this)
         mInterstitialAd.adUnitId = getString(R.string.main_exit_id)
         mInterstitialAd.loadAd(AdRequest.Builder().build())
-
-        mInterstitialAd.adListener = object : AdListener(){
+        mInterstitialAd.adListener = object : AdListener() {
             override fun onAdClosed() {
                 super.onAdClosed()
                 finish()
             }
         }
-
-
         title = intent!!.getStringExtra("title")
         url = intent!!.getStringExtra("url")
         backArrow.setOnClickListener { onBackPressed() }
         toolbarTitle.text = title
 
-        advWebView.setListener(this,object : AdvancedWebView.Listener{
+        advWebView.setListener(this, object : AdvancedWebView.Listener {
             override fun onPageFinished(url: String?) {
                 progressBar.visibility = View.GONE
             }
@@ -113,7 +109,7 @@ class WebViewActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if(mInterstitialAd.isLoaded)
+        if (mInterstitialAd.isLoaded)
             mInterstitialAd.show()
         else
             finish()
