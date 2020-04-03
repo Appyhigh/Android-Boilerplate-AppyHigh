@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import com.appyhigh.utilityapp.Utils.SharedPrefUtil
+import com.appyhigh.utilityapp.utils.SharedPrefUtil
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.InterstitialAd

@@ -1,4 +1,4 @@
-package com.appyhigh.utilityapp.Utils
+package com.appyhigh.utilityapp.utils
 
 
 class Constants{

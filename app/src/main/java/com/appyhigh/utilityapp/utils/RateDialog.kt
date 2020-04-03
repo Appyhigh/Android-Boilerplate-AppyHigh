@@ -1,4 +1,4 @@
-package com.appyhigh.utilityapp.Utils
+package com.appyhigh.utilityapp.utils
 
 import android.content.Intent
 import android.graphics.Color

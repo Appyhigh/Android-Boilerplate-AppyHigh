@@ -12,9 +12,9 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
-import com.appyhigh.utilityapp.Utils.Constants
-import com.appyhigh.utilityapp.Utils.RateDialog
-import com.appyhigh.utilityapp.Utils.SharedPrefUtil
+import com.appyhigh.utilityapp.utils.Constants
+import com.appyhigh.utilityapp.utils.RateDialog
+import com.appyhigh.utilityapp.utils.SharedPrefUtil
 import com.facebook.ads.*
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader

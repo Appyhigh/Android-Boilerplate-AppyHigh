@@ -1,4 +1,4 @@
-package com.appyhigh.utilityapp.Notifications
+package com.appyhigh.utilityapp.notifications
 
 import android.app.ActivityManager
 import android.content.ActivityNotFoundException

@@ -1,8 +1,8 @@
 package com.appyhigh.utilityapp
 
 import android.app.Application
-import com.appyhigh.utilityapp.Notifications.OneSignalNotifOpenHandler
-import com.appyhigh.utilityapp.Notifications.OneSignalNotificationReceivedHandler
+import com.appyhigh.utilityapp.notifications.OneSignalNotifOpenHandler
+import com.appyhigh.utilityapp.notifications.OneSignalNotificationReceivedHandler
 import com.crashlytics.android.Crashlytics
 import com.facebook.FacebookSdk
 import com.facebook.ads.AudienceNetworkAds

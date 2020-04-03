@@ -1,4 +1,4 @@
-package com.appyhigh.utilityapp.Notifications
+package com.appyhigh.utilityapp.notifications
 
 import android.content.Context
 import android.util.Log
