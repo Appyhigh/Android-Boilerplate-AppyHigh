@@ -94,8 +94,8 @@ class OneSignalNotifOpenHandler(private val context: Context) :
                                 val i = Intent(context, WebViewActivity::class.java)
                                 i.putExtra("url", url)
                                 i.putExtra("title", title)
-                                i.flags =
-                                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
+                                i.putExtra("option_flag",true)
+                                i.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
                                 context.startActivity(i)
                             } catch (e: Exception) {
                                 e.printStackTrace()

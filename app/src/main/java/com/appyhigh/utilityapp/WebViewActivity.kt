@@ -22,7 +22,7 @@ class WebViewActivity : AppCompatActivity() {
     var url = ""
     var title = ""
     private lateinit var mInterstitialAd: InterstitialAd
-
+    var  OPTION_FLAG:Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_web_view)
@@ -37,6 +37,7 @@ class WebViewActivity : AppCompatActivity() {
         }
         title = intent!!.getStringExtra("title")
         url = intent!!.getStringExtra("url")
+        OPTION_FLAG = intent!!.getBooleanExtra("option_flag",false)
         backArrow.setOnClickListener { onBackPressed() }
         toolbarTitle.text = title
 
@@ -111,7 +112,16 @@ class WebViewActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if (mInterstitialAd.isLoaded)
             mInterstitialAd.show()
-        else
+        if (OPTION_FLAG) {
+            openMainActivity()
+        } else {
             finish()
+        }
+    }
+    private fun openMainActivity() {
+        val mainIntent = Intent(this@WebViewActivity, MainActivity::class.java)
+        mainIntent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(mainIntent)
+        finish()
     }
 }

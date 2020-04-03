@@ -158,15 +158,15 @@ class MyFirebaseMessaging : FirebaseMessagingService() {
         url: String
     ) {
         try {
-            val notificationIntent = Intent(this, WebViewActivity::class.java)
-            notificationIntent.putExtra("url", url)
-            notificationIntent.putExtra("title", title)
-            notificationIntent.flags =
-                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
+            val i = Intent(context, WebViewActivity::class.java)
+            i.putExtra("url", url)
+            i.putExtra("title", title)
+            i.putExtra("option_flag", true)
+            i.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
             val contentIntent = PendingIntent.getActivity(
                 context,
                 (Math.random() * 100).toInt(),
-                notificationIntent,
+                i,
                 PendingIntent.FLAG_UPDATE_CURRENT
             )
             val notificationBuilder = NotificationCompat.Builder(context, "deeplink")
@@ -177,8 +177,12 @@ class MyFirebaseMessaging : FirebaseMessagingService() {
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setLargeIcon(getBitmapfromUrl(image))
                 .setSmallIcon(R.drawable.logo)
-                .setStyle(NotificationCompat.BigPictureStyle().bigPicture(getBitmapfromUrl(image)).bigLargeIcon(null)).setAutoCancel(true)
-            notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                .setStyle(
+                    NotificationCompat.BigPictureStyle().bigPicture(getBitmapfromUrl(image))
+                        .bigLargeIcon(null)
+                ).setAutoCancel(true)
+            notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationBuilder.setContentIntent(contentIntent)
             // Since android Oreo notification channel is needed.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
