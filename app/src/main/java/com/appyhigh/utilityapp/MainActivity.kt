@@ -137,7 +137,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkForNotifications() {
-        var i = Intent()
         try {
             if (intent.hasExtra("which")) {
                 val which = intent.getStringExtra("which")
@@ -178,7 +177,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     "L" -> {
-                        i = Intent(this, WebViewActivity::class.java)
+                        val i = Intent(this, WebViewActivity::class.java)
                         i.putExtra("url", link)
                         i.putExtra("title", title)
                         startActivity(i)
@@ -187,13 +186,16 @@ class MainActivity : AppCompatActivity() {
                         when (link) {
                             //based on links we can implement this part
                             "appname://WEB" -> {
-                                i = Intent(this, WebViewActivity::class.java)
+                               val i = Intent(this, WebViewActivity::class.java)
+                                startActivity(i)
+
                             }
                             "appname://DASHBOARD" -> {
-                                i = Intent(this, DashboardActivity::class.java)
+                                val i = Intent(this, DashboardActivity::class.java)
+                                startActivity(i)
+
                             }
                         }
-                        startActivity(i)
                     }
                 }
             }
