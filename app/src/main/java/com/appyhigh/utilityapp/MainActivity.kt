@@ -3,14 +3,17 @@ package com.appyhigh.utilityapp
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.cardview.widget.CardView
 import com.appyhigh.utilityapp.utils.Constants
 import com.appyhigh.utilityapp.utils.RateDialog
@@ -27,12 +30,8 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_fb_nativead.view.*
 import kotlinx.android.synthetic.main.layout_nativead_small.view.*
-import java.util.ArrayList
-import android.widget.Toast
-import android.view.Menu
-import android.view.MenuItem
-import androidx.appcompat.view.menu.MenuBuilder
 import kotlinx.android.synthetic.main.snippet_toolbar_home.*
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -40,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var sharedPrefUtil: SharedPrefUtil
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var mInterstitialAd: InterstitialAd
-    private lateinit var fbNativeAd : NativeAd
+    private lateinit var fbNativeAd: NativeAd
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         mInterstitialAd.adUnitId = getString(R.string.main_exit_id)
         mInterstitialAd.loadAd(AdRequest.Builder().build())
 
-        mInterstitialAd.adListener = object : AdListener(){
+        mInterstitialAd.adListener = object : AdListener() {
             override fun onAdClosed() {
                 super.onAdClosed()
                 mInterstitialAd.loadAd(AdRequest.Builder().build())
@@ -73,9 +72,9 @@ class MainActivity : AppCompatActivity() {
         loadFbNativeAd()
     }
 
-    private fun loadFbNativeAd(){
-        fbNativeAd = NativeAd(this,getString(R.string.fb_native_ad))
-        fbNativeAd.setAdListener(object :NativeAdListener{
+    private fun loadFbNativeAd() {
+        fbNativeAd = NativeAd(this, getString(R.string.fb_native_ad))
+        fbNativeAd.setAdListener(object : NativeAdListener {
             override fun onAdClicked(p0: Ad?) {
 
             }
@@ -100,9 +99,10 @@ class MainActivity : AppCompatActivity() {
         fbNativeAd.loadAd()
     }
 
-    private fun inflateFbAdView(nativeAd: NativeAd){
+    private fun inflateFbAdView(nativeAd: NativeAd) {
         nativeAd.unregisterView()
-        val cardView = LayoutInflater.from(this).inflate(R.layout.item_fb_nativead, null) as CardView
+        val cardView =
+            LayoutInflater.from(this).inflate(R.layout.item_fb_nativead, null) as CardView
         nativeAdFb.addView(cardView)
 
         val nativeAdLayout = cardView.native_ad_container as NativeAdLayout
@@ -124,7 +124,8 @@ class MainActivity : AppCompatActivity() {
         nativeAdTitle.text = nativeAd.advertiserName
         nativeAdBody.text = nativeAd.adBodyText
         nativeAdSocialContext.text = nativeAd.adSocialContext
-        nativeAdCallToAction.visibility = if (nativeAd.hasCallToAction()) View.VISIBLE else View.INVISIBLE
+        nativeAdCallToAction.visibility =
+            if (nativeAd.hasCallToAction()) View.VISIBLE else View.INVISIBLE
         nativeAdCallToAction.text = nativeAd.adCallToAction
         sponsoredLabel.text = nativeAd.sponsoredTranslation
 
@@ -135,61 +136,82 @@ class MainActivity : AppCompatActivity() {
         nativeAd.registerViewForInteraction(cardView, nativeAdMedia, nativeAdIcon, clickableViews)
     }
 
-    private fun checkForNotifications(){
+    private fun checkForNotifications() {
+        var i = Intent()
         try {
-            val which = intent.getStringExtra("which")
-            val link = intent.getStringExtra("link")
-            val title = intent.getStringExtra("title")
+            if (intent.hasExtra("which")) {
+                val which = intent.getStringExtra("which")
+                val link = intent.getStringExtra("link")
+                /*if there is no link in extras us url */
+                val url = intent.getStringExtra("url")
+                val title = intent.getStringExtra("title")
 
-            when(which){
-                "P"->{
-                    try {
-                        startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse("market://details?id=$link")
+                when (which) {
+                    "P" -> {
+                        try {
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("market://details?id=$link")
+                                )
                             )
-                        )
-                    } catch (anfe: android.content.ActivityNotFoundException) {
-                        startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse("https://play.google.com/store/apps/details?id=$link")
+                        } catch (anfe: android.content.ActivityNotFoundException) {
+                            startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://play.google.com/store/apps/details?id=$link")
+                                )
                             )
-                        )
+                        }
                     }
-                }
 
-                "B"->{
-                    try {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(link)))
-                    } catch (anfe: android.content.ActivityNotFoundException) {
-                        Toast.makeText(this@MainActivity,"Unable to open the link",Toast.LENGTH_LONG).show()
+                    "B" -> {
+                        try {
+                            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(link)))
+                        } catch (anfe: android.content.ActivityNotFoundException) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Unable to open the link",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
-                }
 
-                "L"->{
-                    val i = Intent(this, WebViewActivity::class.java)
-                    i.putExtra("url", link)
-                    i.putExtra("title", title)
-                    startActivity(i)
+                    "L" -> {
+                        i = Intent(this, WebViewActivity::class.java)
+                        i.putExtra("url", link)
+                        i.putExtra("title", title)
+                        startActivity(i)
+                    }
+                    "D" -> {
+                        when (link) {
+                            //based on links we can implement this part
+                            "appname://WEB" -> {
+                                i = Intent(this, WebViewActivity::class.java)
+                            }
+                            "appname://DASHBOARD" -> {
+                                i = Intent(this, DashboardActivity::class.java)
+                            }
+                        }
+                        startActivity(i)
+                    }
                 }
             }
-        }catch ( e : Exception){
-            Log.e(TAG, "checkForNotifications: $e")
-        }
+            } catch (e: Exception) {
+                Log.e(TAG, "checkForNotifications: $e")
+            }
     }
 
     override fun onBackPressed() {
-        if(mInterstitialAd.isLoaded)
+        if (mInterstitialAd.isLoaded)
             mInterstitialAd.show()
         else
             showExitPopup()
     }
 
-    private fun loadNativeBannerBig(){
+    private fun loadNativeBannerBig() {
         val adLoader = AdLoader.Builder(this, getString(R.string.native_id))
-            .forUnifiedNativeAd { unifiedNativeAd : UnifiedNativeAd ->
+            .forUnifiedNativeAd { unifiedNativeAd: UnifiedNativeAd ->
                 val adView = layoutInflater
                     .inflate(R.layout.layout_nativead_big, null) as UnifiedNativeAdView
                 populateUnifiedNativeAdView(unifiedNativeAd, adView)
@@ -201,6 +223,7 @@ class MainActivity : AppCompatActivity() {
                     // Handle the failure by logging, altering the UI, and so on.
 
                 }
+
                 override fun onAdClicked() {
                     super.onAdClicked()
                     val abTestBundle = Bundle()
@@ -212,9 +235,10 @@ class MainActivity : AppCompatActivity() {
             .build()
         adLoader.loadAd(AdRequest.Builder().build())
     }
-    private fun loadNativeBannerSmall(){
+
+    private fun loadNativeBannerSmall() {
         val adLoader = AdLoader.Builder(this, getString(R.string.native_id))
-            .forUnifiedNativeAd { unifiedNativeAd : UnifiedNativeAd ->
+            .forUnifiedNativeAd { unifiedNativeAd: UnifiedNativeAd ->
                 val adView = layoutInflater
                     .inflate(R.layout.layout_nativead_small, null) as UnifiedNativeAdView
                 populateUnifiedNativeAdView(unifiedNativeAd, adView)
@@ -226,6 +250,7 @@ class MainActivity : AppCompatActivity() {
                     // Handle the failure by logging, altering the UI, and so on.
 
                 }
+
                 override fun onAdClicked() {
                     super.onAdClicked()
                     val abTestBundle = Bundle()
@@ -238,7 +263,10 @@ class MainActivity : AppCompatActivity() {
         adLoader.loadAd(AdRequest.Builder().build())
     }
 
-    private fun populateUnifiedNativeAdView(nativeAd: UnifiedNativeAd, adView: UnifiedNativeAdView) {
+    private fun populateUnifiedNativeAdView(
+        nativeAd: UnifiedNativeAd,
+        adView: UnifiedNativeAdView
+    ) {
         val iconView = adView.ad_icon as ImageView
         Log.e("nativead", "ad body : " + nativeAd.body)
 
@@ -305,18 +333,18 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showRateDialog(){
+    private fun showRateDialog() {
         Handler().postDelayed({
             var times = 0
-            if(!sharedPrefUtil.getBoolean(Constants.RATED,false)){
+            if (!sharedPrefUtil.getBoolean(Constants.RATED, false)) {
                 times = (sharedPrefUtil.getInt(Constants.TIMES, 0) + 1) % 5
-                sharedPrefUtil.saveInt(Constants.TIMES,times)
-                if(times==0){
+                sharedPrefUtil.saveInt(Constants.TIMES, times)
+                if (times == 0) {
                     val rateDialog = RateDialog()
-                    rateDialog.show(supportFragmentManager,"RATEDIALOG")
+                    rateDialog.show(supportFragmentManager, "RATEDIALOG")
                 }
             }
-        },500)
+        }, 500)
     }
 
 
@@ -349,7 +377,7 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.rateUs -> {
                 val rateDialog = RateDialog()
-                rateDialog.show(supportFragmentManager,"RATEDIALOG")
+                rateDialog.show(supportFragmentManager, "RATEDIALOG")
                 true
             }
             else -> super.onOptionsItemSelected(item)

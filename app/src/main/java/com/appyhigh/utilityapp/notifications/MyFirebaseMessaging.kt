@@ -15,6 +15,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.TaskStackBuilder
+import com.appyhigh.utilityapp.MainActivity
 import com.appyhigh.utilityapp.R
 import com.appyhigh.utilityapp.SplashActivity
 import com.appyhigh.utilityapp.WebViewActivity
@@ -64,47 +65,44 @@ class MyFirebaseMessaging : FirebaseMessagingService() {
 
     @Throws(JSONException::class)
     private fun processingNotifications(data: JSONObject) {
-        if (data.getString("which").equals("P", ignoreCase = true)) {
-            goToApp(
-                this,
-                data.getString("title"),
-                data.getString("message"),
-                data.getString("image"),
-                data.getString("playID")
-            )
-        } else if (data.getString("which").equals("B", ignoreCase = true)) {
-            goToWebPage(
-                this,
-                data.getString("title"),
-                data.getString("message"),
-                data.getString("image"),
-                data.getString("url")
-            )
-        } else if (data.getString("which").equals("L", ignoreCase = true)) {
-            goToWebView(
-                this,
-                data.getString("title"),
-                data.getString("message"),
-                data.getString("image"),
-                data.getString("url")
-            )
-        } else if (data.getString("which").equals("in-app-screens", ignoreCase = true)) {
-            goToActivity(
-                this,
-                data.getString("title"),
-                data.getString("message"),
-                data.getString("image"),
-                data.getString("page")
-            )
-        } else if (data.getString("which").equals("app-home-screens", ignoreCase = true)) {
-            goToHomePage(
-                this,
-                data.getString("title"),
-                data.getString("message"),
-                data.getString("image"),
-                data.getString("screen"),
-                data
-            )
+        when {
+            data.getString("which").equals("P", ignoreCase = true) -> {
+                goToPlaystore(
+                    this,
+                    data.getString("title"),
+                    data.getString("message"),
+                    data.getString("image"),
+                    data.getString("playID")
+                )
+            }
+            data.getString("which").equals("B", ignoreCase = true) -> {
+                goToWebPage(
+                    this,
+                    data.getString("title"),
+                    data.getString("message"),
+                    data.getString("image"),
+                    data.getString("url")
+                )
+            }
+            data.getString("which").equals("L", ignoreCase = true) -> {
+                goToWebView(
+                    this,
+                    data.getString("title"),
+                    data.getString("message"),
+                    data.getString("image"),
+                    data.getString("url")
+                )
+            }
+            data.getString("which").equals("D", ignoreCase = true) -> {
+                goToActivity(
+                    this,
+                    data.getString("title"),
+                    data.getString("message"),
+                    data.getString("image"),
+                    data.getString("url"),
+                    data.getString("which")
+                )
+            }
         }
     }
 
@@ -247,29 +245,27 @@ class MyFirebaseMessaging : FirebaseMessagingService() {
         }
     }
 
-    fun goToActivity(
+    private fun goToActivity(
         context: Context?,
         title: String?,
         message: String?,
         image: String?,
-        activityName: String
+        url: String,
+        which: String
     ) {
         try {
-            var notificationIntent: Intent? = null
-            try {
-                notificationIntent = Intent(
-                    context,
-                    Class.forName("com.appyhigh.utilityapp$activityName")
-                )
-            } catch (e: ClassNotFoundException) {
-                e.printStackTrace()
-            }
-            notificationIntent!!.flags = (Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            val i = Intent(context, MainActivity::class.java)
+            i.putExtra("which", which)
+            i.putExtra("url", url)
+            i.putExtra("title", title)
+            i.putExtra("option_flag", true)
+            i.flags =
+                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
+
             val contentIntent = PendingIntent.getActivity(
                 context,
                 (Math.random() * 100).toInt(),
-                notificationIntent,
+                i,
                 PendingIntent.FLAG_UPDATE_CURRENT
             )
             val drivingNotifBldr =
@@ -351,7 +347,7 @@ class MyFirebaseMessaging : FirebaseMessagingService() {
         }
     }
 
-    fun goToApp(
+    private fun goToPlaystore(
         context: Context?,
         title: String?,
         message: String?,

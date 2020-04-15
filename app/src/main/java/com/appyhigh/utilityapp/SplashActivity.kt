@@ -84,60 +84,63 @@ class SplashActivity : AppCompatActivity() {
     }
 
 
-    fun nextActivity() {
+    private fun nextActivity() {
         startActivity(Intent(this@SplashActivity, MainActivity::class.java))
         finish()
     }
 
     private fun checkForLatestVersion() {
-        // Creates instance of the manager.
-        val appUpdateManager = AppUpdateManagerFactory.create(this@SplashActivity)
-        appUpdateManager
-            .appUpdateInfo
-            .addOnSuccessListener { appUpdateInfo ->
-                if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
-                    // If an in-app update is already running, resume the update.
-                    try {
-                        appUpdateManager.startUpdateFlowForResult(
-                            appUpdateInfo,
-                            AppUpdateType.IMMEDIATE,
-                            this,
-                            212
-                        )
-                    } catch (e: IntentSender.SendIntentException) {
-                        e.printStackTrace()
-                        nextActivity()
-                    }
+        if (BuildConfig.DEBUG) {
+            nextActivity()
+        } else {// Creates instance of the manager.
+            val appUpdateManager = AppUpdateManagerFactory.create(this@SplashActivity)
+            appUpdateManager
+                .appUpdateInfo
+                .addOnSuccessListener { appUpdateInfo ->
+                    if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                        // If an in-app update is already running, resume the update.
+                        try {
+                            appUpdateManager.startUpdateFlowForResult(
+                                appUpdateInfo,
+                                AppUpdateType.IMMEDIATE,
+                                this,
+                                212
+                            )
+                        } catch (e: IntentSender.SendIntentException) {
+                            e.printStackTrace()
+                            nextActivity()
+                        }
 
-                } else {
-                    // Returns an intent object that you use to check for an update.
-                    val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+                    } else {
+                        // Returns an intent object that you use to check for an update.
+                        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
 
-                    // Checks that the platform will allow the specified type of update.
-                    appUpdateInfoTask.addOnSuccessListener { appUpdateInfoNew ->
-                        if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-                            // For a flexible update, use AppUpdateType.FLEXIBLE
-                            && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
-                        ) {
-                            // Request the update.
-                            try {
-                                appUpdateManager.startUpdateFlowForResult(
-                                    appUpdateInfoNew,
-                                    AppUpdateType.IMMEDIATE,
-                                    this@SplashActivity,
-                                    212
-                                )
-                            } catch (e: IntentSender.SendIntentException) {
-                                e.printStackTrace()
+                        // Checks that the platform will allow the specified type of update.
+                        appUpdateInfoTask.addOnSuccessListener { appUpdateInfoNew ->
+                            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                                // For a flexible update, use AppUpdateType.FLEXIBLE
+                                && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+                            ) {
+                                // Request the update.
+                                try {
+                                    appUpdateManager.startUpdateFlowForResult(
+                                        appUpdateInfoNew,
+                                        AppUpdateType.IMMEDIATE,
+                                        this@SplashActivity,
+                                        212
+                                    )
+                                } catch (e: IntentSender.SendIntentException) {
+                                    e.printStackTrace()
+                                    nextActivity()
+                                }
+
+                            } else {
                                 nextActivity()
                             }
-
-                        } else {
-                            nextActivity()
                         }
                     }
                 }
-            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

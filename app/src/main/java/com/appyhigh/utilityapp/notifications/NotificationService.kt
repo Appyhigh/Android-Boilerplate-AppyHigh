@@ -23,6 +23,11 @@ import java.net.URL
 import java.util.*
 
 class NotificationService : FirebaseMessagingService() {
+    override fun onNewToken(fcmToken: String) {
+        super.onNewToken(fcmToken)
+        Log.e("Firebase Token", "****TOKEN***$fcmToken")
+    }
+
     val TAG = "NotificationService"
     lateinit var bitmap: Bitmap
     override fun onMessageReceived(remoteMessage: RemoteMessage) {

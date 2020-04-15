@@ -8,7 +8,7 @@ apply plugin: 'com.google.gms.google-services'  // Google Play services Gradle p
 
 buildscript {
     repositories {
-        maven { url 'https://plugins.gradle.org/m2/'}
+        maven { url 'https://plugins.gradle.org/m2/' }
         maven { url 'https://maven.google.com' }
         maven { url 'https://maven.fabric.io/public' }
     }
@@ -29,7 +29,7 @@ android {
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
-                onesignal_app_id: 'a18d607d-cf51-4e9f-8a13-ce0fe006ce06',
+                onesignal_app_id               : 'a18d607d-cf51-4e9f-8a13-ce0fe006ce06',
                 onesignal_google_project_number: 'REMOTE'
         ]
     }

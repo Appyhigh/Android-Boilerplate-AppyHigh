@@ -13,6 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".DashboardActivity"></activity>
         <activity
             android:name=".WebViewActivity"
             android:excludeFromRecents="true"
@@ -68,7 +69,6 @@
         <meta-data
             android:name="com.onesignal.NotificationOpened.DEFAULT"
             android:value="DISABLE" />
-
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="1348b076a708434944a96f21cfd02be519493783" />

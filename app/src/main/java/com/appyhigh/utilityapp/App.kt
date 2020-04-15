@@ -25,6 +25,10 @@ class App : Application() {
         AudienceNetworkAds.initialize(this)
         AudienceNetworkAds.isInAdsProcess(this)
         FirebaseMessaging.getInstance().subscribeToTopic("ALLUSERS")
+        FirebaseMessaging.getInstance().subscribeToTopic("UtilityApp")
+        if (BuildConfig.DEBUG){
+            FirebaseMessaging.getInstance().subscribeToTopic("UtilityAppDebug")
+        }
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         MobileAds.initialize(this, getString(R.string.admob_app_id))
         Fabric.with(this, Crashlytics())
