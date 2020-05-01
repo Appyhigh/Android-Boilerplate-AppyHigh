@@ -13,7 +13,7 @@ buildscript {
         maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
-        classpath 'gradle.plugin.com.onesignal:onesignal-gradle-plugin:[0.12.4, 0.99.99]'
+        classpath 'gradle.plugin.com.onesignal:onesignal-gradle-plugin:0.12.6'
     }
 }
 
@@ -58,27 +58,27 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.core:core-ktx:1.1.0'
+    implementation 'androidx.core:core-ktx:1.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     //design
-    implementation 'com.google.android.material:material:1.0.0-rc01'
+    implementation 'com.google.android.material:material:1.2.0-alpha06'
 
     //cardview & recyclerview
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
 
     //advanced webview
     implementation 'com.github.delight-im:Android-AdvancedWebView:v3.0.0'
 
     //lottie
-    implementation "com.airbnb.android:lottie:3.0.1"
+    implementation "com.airbnb.android:lottie:3.4.0"
 
     //material rating bar
-    implementation 'me.zhanghai.android.materialratingbar:library:1.3.2'
+    implementation 'me.zhanghai.android.materialratingbar:library:1.4.0'
 
     //crashlytics
     implementation('com.crashlytics.sdk.android:crashlytics:2.10.1@aar') {
@@ -86,18 +86,19 @@ dependencies {
     }
 
     //admob
-    implementation 'com.google.android.gms:play-services-ads:18.3.0'
+    implementation 'com.google.android.gms:play-services-ads:19.1.0'
 
     //multidex
     implementation 'com.android.support:multidex:1.0.3'
 
     //firebase
-    implementation 'com.google.firebase:firebase-core:17.2.1'
-    implementation 'com.google.firebase:firebase-messaging:20.0.0'
-    implementation 'com.google.firebase:firebase-config:19.0.3'
-
+    implementation 'com.google.firebase:firebase-core:17.4.0'
+    implementation 'com.google.firebase:firebase-messaging:20.1.6'
+    implementation 'com.google.firebase:firebase-config:19.1.4'
+    implementation 'com.google.firebase:firebase-inappmessaging-display:19.0.6'
+    implementation 'com.google.firebase:firebase-dynamic-links:19.1.0'
     //onesignal
-    implementation 'com.onesignal:OneSignal:3.12.1'
+    implementation 'com.onesignal:OneSignal:3.13.0'
 
     //fb login
     implementation 'com.facebook.android:facebook-login:[5,6)'
@@ -108,7 +109,7 @@ dependencies {
 
 
     //in app update
-    implementation 'com.google.android.play:core:1.6.4'
+    implementation 'com.google.android.play:core:1.7.2'
 
     //xmode
     implementation "com.github.xmode-social-inc:android-mysdk:1.9.2"

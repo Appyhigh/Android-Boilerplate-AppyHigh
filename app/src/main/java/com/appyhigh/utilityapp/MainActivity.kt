@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.cardview.widget.CardView
+import com.appyhigh.utilityapp.notifications.InAppMessageClickListener
 import com.appyhigh.utilityapp.utils.Constants
 import com.appyhigh.utilityapp.utils.RateDialog
 import com.appyhigh.utilityapp.utils.SharedPrefUtil
@@ -27,6 +28,7 @@ import com.google.android.gms.ads.formats.NativeAdOptions
 import com.google.android.gms.ads.formats.UnifiedNativeAd
 import com.google.android.gms.ads.formats.UnifiedNativeAdView
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.inappmessaging.FirebaseInAppMessaging
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.item_fb_nativead.view.*
 import kotlinx.android.synthetic.main.layout_nativead_small.view.*
@@ -45,6 +47,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(homeToolBar)
+        FirebaseInAppMessaging.getInstance().isAutomaticDataCollectionEnabled = true
+        FirebaseInAppMessaging.getInstance().setMessagesSuppressed(false)
+        FirebaseAnalytics.getInstance(this).logEvent("main_screen_opened", null)
+        FirebaseInAppMessaging.getInstance().triggerEvent("main_screen_opened")
         checkForNotifications()
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         sharedPrefUtil = SharedPrefUtil(this)
@@ -70,6 +76,8 @@ class MainActivity : AppCompatActivity() {
         loadNativeBannerSmall()
         showRateDialog()
         loadFbNativeAd()
+        val listener = InAppMessageClickListener(applicationContext)
+        FirebaseInAppMessaging.getInstance().addClickListener(listener)
     }
 
     private fun loadFbNativeAd() {
@@ -191,7 +199,7 @@ class MainActivity : AppCompatActivity() {
 
                             }
                             "appname://DASHBOARD" -> {
-                                val i = Intent(this, DashboardActivity::class.java)
+                                var i = Intent(this, DashboardActivity::class.java)
                                 startActivity(i)
 
                             }

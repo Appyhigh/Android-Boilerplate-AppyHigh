@@ -8,6 +8,7 @@ import com.facebook.FacebookSdk
 import com.facebook.ads.AudienceNetworkAds
 import com.google.android.gms.ads.MobileAds
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.inappmessaging.FirebaseInAppMessaging
 import com.google.firebase.messaging.FirebaseMessaging
 import com.onesignal.OneSignal
 import io.fabric.sdk.android.Fabric
@@ -26,11 +27,14 @@ class App : Application() {
         AudienceNetworkAds.isInAdsProcess(this)
         FirebaseMessaging.getInstance().subscribeToTopic("ALLUSERS")
         FirebaseMessaging.getInstance().subscribeToTopic("UtilityApp")
-        if (BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG) {
             FirebaseMessaging.getInstance().subscribeToTopic("UtilityAppDebug")
         }
+        /*FirebaseAnalytics*/
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
-        MobileAds.initialize(this, getString(R.string.admob_app_id))
+        /*mobile ads*/
+        MobileAds.initialize(this, {})
+        /*Crashlytics*/
         Fabric.with(this, Crashlytics())
         // OneSignal Initialization
         OneSignal.startInit(this)
@@ -39,5 +43,7 @@ class App : Application() {
             .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
             .unsubscribeWhenNotificationsAreDisabled(true)
             .init()
+        /*FirebaseInAppMessaging*/
+        FirebaseInAppMessaging.getInstance().setMessagesSuppressed(true)
     }
 }
