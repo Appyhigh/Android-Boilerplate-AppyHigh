@@ -2,8 +2,9 @@ package com.appyhigh.utilityapp
 
 import android.app.Application
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
-import com.appyhigh.utilityapp.BuildConfig.DEBUG
+import com.appyhigh.utilityapp.events.AnalyticsManager
 import com.appyhigh.utilityapp.notifications.OneSignalNotifOpenHandler
 import com.appyhigh.utilityapp.notifications.OneSignalNotificationReceivedHandler
 import com.crashlytics.android.Crashlytics
@@ -51,6 +52,20 @@ class App : Application() {
             .init()
         /*FirebaseInAppMessaging*/
         FirebaseInAppMessaging.getInstance().setMessagesSuppressed(true)
+
+        /*Events*/
+        AnalyticsManager.initialize(this)
+        /*single event*/
+        AnalyticsManager.logEvent("AppOpened")
+        /*event with params*/
+        val bundle = Bundle()
+        with(bundle) {
+            putString(
+                "Time",
+                System.currentTimeMillis().toString()
+            )
+        }
+        AnalyticsManager.logEvent("AppOpened", bundle)
     }
 
     class AudienceNetworkInitializeHelper : InitListener {

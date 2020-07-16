@@ -96,6 +96,14 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="@string/admob_app_id" />
+        <!--Paste Your Account ID-->
+        <!--Paste Your TOKEN ID-->
+        <meta-data
+            android:name="CLEVERTAP_ACCOUNT_ID"
+            android:value="W6K-ZZ9-495Z" />
+        <meta-data
+            android:name="CLEVERTAP_TOKEN"
+            android:value="c11-360" />
     </application>
 
 </manifest>
