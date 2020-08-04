@@ -164,7 +164,7 @@ url = result.notification.payload.additionalData.getString("url")
 	* Expected JSON for **D** type:  
 	```
 	{
-		"to": "/topics/AppNameDebug/AppName/ALLUSERS",
+		"to": "/topics/AppName",
 		"data": {
 			"title": "No lockdown in this country, may get worse than Italy",
 			"message": "No lockdown in this country, may get worse than Italy",
