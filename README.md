@@ -438,3 +438,41 @@ To check for updates, call the below function. This task is usually done before 
 ```  
 ## Glide  
 When using the *Glide* library to load images, make sure to use global context instead of activity context.  
+
+
+## Events (Firebase&CleverTap)
+
+1. Add the following lines to the app-level *build.gradle* file 
+```
+//firebase
+implementation 'com.google.firebase:firebase-analytics:17.4.0'
+//
+implementation 'com.clevertap.android:clevertap-android-sdk:3.8.0'
+implementation 'com.android.installreferrer:installreferrer:1.0' // Mandatory for v3.6.4 and above
+
+<meta-data  
+        android:name="CLEVERTAP_ACCOUNT_ID"  
+        android:value="Your CleverTap Account ID"/>  
+   <meta-data  
+        android:name="CLEVERTAP_TOKEN"  
+        android:value="Your CleverTap Account Token"/>
+
+```  
+Note: Replace "Your CleverTap Account ID" and "Your CleverTap Account Token" with actual values from your CleverTap [Dashboard](https://dashboard.clevertap.com) -> Settings -> Integration -> Account ID, SDK's.
+
+2. Initialize Custom AnalyticsManager to AppApplication
+```
+AnalyticsManager.initialize(this)
+```
+
+3. Initialize Custom AnalyticsManager in your BaseApplication
+```
+  //only event
+ AnalyticsManager.logEvent("AppOpened")
+  //event with params
+    val bundle = Bundle()
+        with(bundle) {
+            putString("Time",System.currentTimeMillis().toString())
+        }
+        AnalyticsManager.logEvent("AppOpened", bundle)
+```

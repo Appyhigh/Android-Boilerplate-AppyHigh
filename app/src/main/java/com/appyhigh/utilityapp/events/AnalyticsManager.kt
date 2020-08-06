@@ -16,9 +16,10 @@ object AnalyticsManager {
         "/data/local/xbin/", "/data/local/bin/", "/system/sd/xbin/", "/system/bin/failsafe/",
         "/data/local/"
     )
-    private var sAppContext: Context? = null
-    private var mFirebaseAnalytics: FirebaseAnalytics? = null
-    private var cleverTapDefaultInstance: CleverTapAPI? = null
+    private lateinit var sAppContext: Context
+    private lateinit var mFirebaseAnalytics: FirebaseAnalytics
+    private lateinit var cleverTapDefaultInstance: CleverTapAPI
+
     private fun canSend(): Boolean {
         return sAppContext != null && mFirebaseAnalytics != null
     }
@@ -29,13 +30,26 @@ object AnalyticsManager {
 
     @Synchronized
     fun initialize(context: Context) {
-        sAppContext = context
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(context)
-        cleverTapDefaultInstance = CleverTapAPI.getDefaultInstance(context)
-        setProperty("DeviceType", getDeviceType(context))
-        setProperty(
-            "Rooted", isRooted.toString()
-        )
+        try {
+            sAppContext = context
+            mFirebaseAnalytics = FirebaseAnalytics.getInstance(context)
+            try {
+                cleverTapDefaultInstance = CleverTapAPI.getDefaultInstance(context)!!
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            /*ApxorSDK.initialize(R.string.apxor_id, context)*/
+            setProperty(
+                "DeviceType",
+                getDeviceType(context)
+            )
+            setProperty(
+                "Rooted",
+                java.lang.Boolean.toString(isRooted())
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun setProperty(
@@ -43,94 +57,149 @@ object AnalyticsManager {
         propertyValue: String
     ) {
         if (canSend()) {
-            mFirebaseAnalytics!!.setUserProperty(propertyName, propertyValue)
+            mFirebaseAnalytics.setUserProperty(propertyName, propertyValue)
         }
     }
 
-    fun logEvent(eventName: String?) {
-        if (canSend()) {
-            mFirebaseAnalytics!!.logEvent(eventName!!, Bundle())
-            pushCTEvent(eventName)
+    fun logEvent(eventName: String) {
+        try {
+            if (canSend()) {
+                mFirebaseAnalytics.logEvent(eventName, Bundle())
+                pushCTEvent(eventName)
+                /*apxorLogEvent(eventName)*/
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
-    fun logEvent(eventName: String?, params: Bundle) {
-        if (canSend()) {
-            mFirebaseAnalytics!!.logEvent(eventName!!, params)
-            pushCTEventWithParams(eventName, bundleToMap(params))
+    fun logEvent(eventName: String, params: Bundle) {
+        try {
+            if (canSend()) {
+                mFirebaseAnalytics.logEvent(eventName, params)
+                pushCTEventWithParams(
+                    eventName,
+                    bundleToMap(params)
+                )
+                /* apxorLogEventWithParams(
+                     eventName,
+                     getAttributes(params)
+                 )*/
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
-    fun bundleToMap(extras: Bundle): HashMap<String?, Any?> {
+    private fun bundleToMap(extras: Bundle): HashMap<String?, Any?>? {
         val map =
             HashMap<String?, Any?>()
-        val ks = extras.keySet()
-        for (key in ks) {
-            map[key] = extras.getString(key)
+        try {
+            val ks = extras.keySet()
+            for (key in ks) {
+                map[key] = extras.getString(key)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
         return map
     }
 
-    fun setCurrentScreen(activity: Activity?, screenName: String?) {
+    fun setCurrentScreen(
+        activity: Activity,
+        screenName: String?
+    ) {
         if (canSend()) {
             if (null != screenName) {
-                mFirebaseAnalytics!!.setCurrentScreen(
-                    activity!!,
-                    screenName,
-                    screenName
-                )
-                cleverTapDefaultInstance!!.recordScreen(screenName)
+                mFirebaseAnalytics.setCurrentScreen(activity, screenName, screenName)
+                cleverTapDefaultInstance.recordScreen(screenName)
+                /*ApxorSDK.trackScreen(screenName)*/
             }
         }
     }
 
     private fun getDeviceType(c: Context): String {
-        val uiModeManager =
-            c.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
-        val modeType = uiModeManager.currentModeType
-        return when (modeType) {
-            Configuration.UI_MODE_TYPE_TELEVISION -> "TELEVISION"
-            Configuration.UI_MODE_TYPE_WATCH -> "WATCH"
-            Configuration.UI_MODE_TYPE_NORMAL -> if (isTablet(
-                    c
-                )
-            ) "TABLET" else "PHONE"
-            Configuration.UI_MODE_TYPE_UNDEFINED -> "UNKOWN"
-            else -> ""
+        try {
+            val uiModeManager = c.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
+            return when (uiModeManager.currentModeType) {
+                Configuration.UI_MODE_TYPE_TELEVISION -> "TELEVISION"
+                Configuration.UI_MODE_TYPE_WATCH -> "WATCH"
+                Configuration.UI_MODE_TYPE_NORMAL -> if (isTablet(
+                        c
+                    )
+                ) "TABLET" else "PHONE"
+                Configuration.UI_MODE_TYPE_UNDEFINED -> "UNKOWN"
+                else -> ""
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return "UNKOWN"
         }
     }
 
-    private val isRooted: Boolean
-        get() {
-            for (p in binaryPlaces) {
-                val su = File(p + "su")
-                if (su.exists()) {
-                    return true
-                }
+    private fun isRooted(): Boolean {
+        for (p in binaryPlaces) {
+            val su = File(p + "su")
+            if (su.exists()) {
+                return true
             }
-            return false
         }
+        return false
+    }
 
     private fun isTablet(context: Context): Boolean {
         return context.resources.configuration.smallestScreenWidthDp >= 600
     }
 
-    fun pushCTEvent(eventName: String?) {
+    private fun pushCTEvent(eventName: String?) {
         if (canPush()) {
-            cleverTapDefaultInstance!!.pushEvent(eventName)
+            cleverTapDefaultInstance.pushEvent(eventName)
         }
     }
 
-    fun pushCTEventWithParams(
+    private fun pushCTEventWithParams(
         eventName: String?,
         hashMap: HashMap<String?, Any?>?
     ) {
         if (canPush()) {
-            cleverTapDefaultInstance!!.pushEvent(eventName, hashMap)
+            cleverTapDefaultInstance.pushEvent(eventName, hashMap)
         }
     }
 
-    fun pushCTProfile(eventName: HashMap<String?, Any?>?) {
-        cleverTapDefaultInstance!!.pushProfile(eventName)
+/*
+    private fun apxorLogEvent(eventName: String?) {
+        if (canSend()) {
+            ApxorSDK.logAppEvent(eventName)
+        }
+    }
+*/
+
+/*
+    private fun apxorLogEventWithParams(
+        eventName: String?,
+        attributes: Attributes?
+    ) {
+        if (canSend()) {
+            ApxorSDK.logAppEvent(eventName, attributes)
+        }
+    }
+*/
+
+/*
+    private fun getAttributes(bundle: Bundle): Attributes {
+        val attributes = Attributes()
+        try {
+            for (key in bundle.keySet()) {
+                attributes.putAttribute(key, bundle[key].toString())
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return attributes
+    }
+*/
+
+    fun pushCTProfile(hashMap: HashMap<String?, Any?>?) {
+        cleverTapDefaultInstance.pushProfile(hashMap)
     }
 }
