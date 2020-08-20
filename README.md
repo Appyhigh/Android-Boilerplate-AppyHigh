@@ -96,7 +96,7 @@ url = result.notification.payload.additionalData.getString("url")
 	* Expected JSON for **P** type:  
 	```
 	{
-		"to": "/topics/AppNameDebug/AppName/ALLUSERS",
+		"to": "/topics/AppName",
 		"data": {
 			"title": "No lockdown in this country, may get worse than Italy",
 			"message": "No lockdown in this country, may get worse than Italy",
@@ -117,7 +117,7 @@ url = result.notification.payload.additionalData.getString("url")
 	* Expected JSON for **B** type:  
 	```
 	{
-		"to": "/topics/AppNameDebug/AppName/ALLUSERS",
+		"to": "/topics/AppName",
 		"data": {
 			"title": "No lockdown in this country, may get worse than Italy",
 			"message": "No lockdown in this country, may get worse than Italy",
@@ -140,7 +140,7 @@ url = result.notification.payload.additionalData.getString("url")
 	* Expected JSON for **L** type:  
 	```
 	{
-		"to": "/topics/AppNameDebug/AppName/ALLUSERS",
+		"to": "/topics/Appname",
 		"data": {
 			"title": "No lockdown in this country, may get worse than Italy",
 			"message": "No lockdown in this country, may get worse than Italy",
