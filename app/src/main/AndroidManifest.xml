@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.appyhigh.utilityapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -71,17 +70,8 @@
         </activity>
 
         <service
-            android:name=".notifications.NotificationService"
-            android:exported="false"
-            tools:ignore="InnerclassSeparator">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-        <service
             android:name=".notifications.MyFirebaseMessaging"
-            android:exported="false"
-            tools:ignore="InnerclassSeparator">
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
@@ -91,11 +81,8 @@
             android:name="com.onesignal.NotificationOpened.DEFAULT"
             android:value="DISABLE" />
         <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="1348b076a708434944a96f21cfd02be519493783" />
-        <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="@string/admob_app_id" />
+            android:value="@string/test_app_id" />
         <!--Paste Your Account ID-->
         <!--Paste Your TOKEN ID-->
         <meta-data

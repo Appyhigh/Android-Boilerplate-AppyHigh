@@ -7,7 +7,6 @@ import android.util.Log
 import com.appyhigh.utilityapp.events.AnalyticsManager
 import com.appyhigh.utilityapp.notifications.OneSignalNotifOpenHandler
 import com.appyhigh.utilityapp.notifications.OneSignalNotificationReceivedHandler
-import com.crashlytics.android.Crashlytics
 import com.facebook.ads.AdSettings
 import com.facebook.ads.AudienceNetworkAds
 import com.facebook.ads.AudienceNetworkAds.InitListener
@@ -18,7 +17,6 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.inappmessaging.FirebaseInAppMessaging
 import com.google.firebase.messaging.FirebaseMessaging
 import com.onesignal.OneSignal
-import io.fabric.sdk.android.Fabric
 
 
 class App : Application() {
@@ -30,7 +28,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        AudienceNetworkAds.initialize(applicationContext);
+        AudienceNetworkAds.initialize(applicationContext)
         AudienceNetworkInitializeHelper.initialize(applicationContext)
         FirebaseMessaging.getInstance().subscribeToTopic("ALLUSERS")
         FirebaseMessaging.getInstance().subscribeToTopic("UtilityApp")
@@ -41,8 +39,7 @@ class App : Application() {
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         /*mobile ads*/
         MobileAds.initialize(this, OnInitializationCompleteListener { })
-        /*Crashlytics*/
-        Fabric.with(this, Crashlytics())
+
         // OneSignal Initialization
         OneSignal.startInit(this)
             .setNotificationOpenedHandler(OneSignalNotifOpenHandler(applicationContext))

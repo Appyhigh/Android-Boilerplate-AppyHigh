@@ -27,7 +27,7 @@ class WebViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_web_view)
         mInterstitialAd = InterstitialAd(this)
-        mInterstitialAd.adUnitId = getString(R.string.main_exit_id)
+        mInterstitialAd.adUnitId = getString(R.string.test_interstitial)
         mInterstitialAd.loadAd(AdRequest.Builder().build())
         mInterstitialAd.adListener = object : AdListener() {
             override fun onAdClosed() {
@@ -35,9 +35,9 @@ class WebViewActivity : AppCompatActivity() {
                 finish()
             }
         }
-        title = intent!!.getStringExtra("title")
-        url = intent!!.getStringExtra("url")
-        OPTION_FLAG = intent!!.getBooleanExtra("option_flag",false)
+        title = intent?.getStringExtra("title").toString()
+        url = intent?.getStringExtra("url").toString()
+        OPTION_FLAG = intent!!.getBooleanExtra("option_flag", false)
         backArrow.setOnClickListener { onBackPressed() }
         toolbarTitle.text = title
 

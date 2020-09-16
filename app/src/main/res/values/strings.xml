@@ -7,13 +7,13 @@
     <string name="fb_native_ad">1035148903502599_1035154756835347</string>
 
     <!--TEST-->
-    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
-    <string name="banner_id">ca-app-pub-3940256099942544/6300978111</string>
-    <string name="native_id">ca-app-pub-3940256099942544/2247696110</string>
-    <string name="splash_enter_id">ca-app-pub-3940256099942544/1033173712</string>
-    <string name="main_exit_id">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="test_app_id">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="test_banner_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="test_native_id">ca-app-pub-3940256099942544/2247696110</string>
+    <string name="test_interstitial">ca-app-pub-3940256099942544/1033173712</string>
 
     <!--REAL-->
     <string name="notifications_admin_channel_name">Global channel</string>
     <string name="notifications_admin_channel_description">Notifications sent from the app admin</string>
+    <string name="ad">Ad</string>
 </resources>

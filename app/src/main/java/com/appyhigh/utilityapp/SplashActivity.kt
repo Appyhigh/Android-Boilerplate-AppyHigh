@@ -32,7 +32,7 @@ class SplashActivity : AppCompatActivity() {
 
         sharedPrefUtil = SharedPrefUtil(this)
         mInterstitialAd = InterstitialAd(this)
-        mInterstitialAd.adUnitId = getString(R.string.splash_enter_id)
+        mInterstitialAd.adUnitId = getString(R.string.test_interstitial)
 
         mInterstitialAd.adListener = object : AdListener() {
             override fun onAdClosed() {

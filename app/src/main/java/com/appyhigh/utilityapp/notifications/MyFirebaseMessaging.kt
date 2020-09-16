@@ -1,28 +1,24 @@
 package com.appyhigh.utilityapp.notifications
 
-import android.app.ActivityManager
-import android.app.ActivityManager.RunningAppProcessInfo
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import androidx.core.app.TaskStackBuilder
 import com.appyhigh.utilityapp.MainActivity
 import com.appyhigh.utilityapp.R
-import com.appyhigh.utilityapp.SplashActivity
-import com.appyhigh.utilityapp.WebViewActivity
+import com.clevertap.android.sdk.CleverTapAPI
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import org.json.JSONException
-import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
@@ -31,377 +27,179 @@ import java.util.*
  * Created by tito on 27/12/17.
  */
 class MyFirebaseMessaging : FirebaseMessagingService() {
-    var pattern = longArrayOf(500, 500, 500, 500, 500, 500, 500, 500, 500)
-    var iUniqueId = (System.currentTimeMillis() and 0xfffffff).toInt()
-    private var notificationManager: NotificationManager? = null
-    private val ADMIN_CHANNEL_ID = "admin_channel"
-    override fun onNewToken(fcmToken: String) {
-        super.onNewToken(fcmToken)
-        Log.e("Firebase Token", "****TOKEN***$fcmToken")
+    var bitmap: Bitmap? = null
+
+    override fun onMessageSent(s: String) {
+        super.onMessageSent(s)
+        Log.d(TAG, "onMessageSent: $s")
     }
 
+    override fun onSendError(s: String, e: Exception) {
+        super.onSendError(s, e)
+        Log.d(TAG, "onSendError: $e")
+    }
+
+    override fun onNewToken(s: String) {
+        super.onNewToken(s)
+        Objects.requireNonNull(CleverTapAPI.getDefaultInstance(applicationContext))
+            .pushFcmRegistrationId(s, true)
+        Log.d(TAG, "onNewToken: $s")
+    }
+
+    /**
+     * Called when message is received.
+     *
+     * @param remoteMessage Object representing the message received from Firebase Cloud Messaging.
+     */
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        super.onMessageReceived(remoteMessage)
-        if (remoteMessage.data.isNotEmpty()) {
-            Log.d(TAG, "MESSAGE payload: " + remoteMessage.data)
-            val data: JSONObject
-            if (remoteMessage.data.containsKey("which")) {
-                try {
-                    data = JSONObject(remoteMessage.data as Map<*, *>)
-                    processingNotifications(data)
-                } catch (e: JSONException) {
-                    e.printStackTrace()
+        try {
+            // There are two types of messages data messages and notification messages. Data messages are handled
+            // here in onMessageReceived whether the app is in the foreground or background. Data messages are the type
+            // traditionally used with GCM. Notification messages are only received here in onMessageReceived when the app
+            // is in the foreground. When the app is in the background an automatically generated notification is displayed.
+            // When the user taps on the notification they are returned to the app. Messages containing both notification
+            // and data payloads are treated as notification messages. The Firebase console always sends notification
+            // messages. For more see: https://firebase.google.com/docs/cloud-messaging/concept-options
+            Log.d(
+                TAG,
+                "From: " + remoteMessage.from
+            )
+            // Check if message contains a data payload.
+            if (remoteMessage.data.isNotEmpty()) {
+                Log.d(
+                    TAG,
+                    "Message data payload: " + remoteMessage.data
+                )
+            }
+            // Check if message contains a notification payload.
+            if (remoteMessage.notification != null) {
+                Log.d(
+                    TAG,
+                    "Message Notification Body: " + remoteMessage.notification!!.body
+                )
+            }
+            if (remoteMessage.data.isNotEmpty()) {
+                val extras = Bundle()
+                for ((key, value) in remoteMessage.data) {
+                    extras.putString(key, value)
                 }
-            } else if (remoteMessage.data.containsKey("title") && remoteMessage.data.containsKey("message")
-            ) {
-                try {
-                    createNotification(remoteMessage)
-                } catch (e: Exception) {
-                    e.printStackTrace()
+                val info = CleverTapAPI.getNotificationInfo(extras)
+                //message will contain the Push Message
+                //imageUri will contain URL of the image to be displayed with Notification
+                //link to send
+                //P=Playstore, L=Link in app, B=external browser,D=Deeplink
+                //To get a Bitmap image from the URL received
+                var message: String?
+                val imageUri: String?
+                val link: String?
+                val which: String?
+                val title: String?
+                if (info.fromCleverTap) {
+                    if (extras.getString("nm") != "" || extras.getString("nm") != null
+                    ) {
+                        message = extras.getString("message")
+                        message = extras.getString("nm")
+                        imageUri = extras.getString("image")
+                        link = extras.getString("link")
+                        which = extras.getString("which")
+                        title = extras.getString("title")
+                        bitmap = getBitmapfromUrl(imageUri)
+                        if (message != null) {
+                            if (message != "") {
+                                sendNotification(message, bitmap, which, link, title)
+                            } else {
+                                Objects.requireNonNull(
+                                    CleverTapAPI.getDefaultInstance(
+                                        applicationContext
+                                    )
+                                ).pushNotificationViewedEvent(extras)
+                            }
+                        }
+                    }
+                } else {
+                    message = remoteMessage.data["message"]
+                    imageUri = remoteMessage.data["image"]
+                    link = remoteMessage.data["link"]
+                    which = remoteMessage.data["which"]
+                    title = remoteMessage.data["title"]
+                    bitmap = getBitmapfromUrl(imageUri)
+                    sendNotification(message, bitmap, which, link, title)
                 }
             }
-        }
-    }
-
-    @Throws(JSONException::class)
-    private fun processingNotifications(data: JSONObject) {
-        when {
-            data.getString("which").equals("P", ignoreCase = true) -> {
-                goToPlaystore(
-                    this,
-                    data.getString("title"),
-                    data.getString("message"),
-                    data.getString("image"),
-                    data.getString("playID")
-                )
-            }
-            data.getString("which").equals("B", ignoreCase = true) -> {
-                goToWebPage(
-                    this,
-                    data.getString("title"),
-                    data.getString("message"),
-                    data.getString("image"),
-                    data.getString("url")
-                )
-            }
-            data.getString("which").equals("L", ignoreCase = true) -> {
-                goToWebView(
-                    this,
-                    data.getString("title"),
-                    data.getString("message"),
-                    data.getString("image"),
-                    data.getString("url")
-                )
-            }
-            data.getString("which").equals("D", ignoreCase = true) -> {
-                goToActivity(
-                    this,
-                    data.getString("title"),
-                    data.getString("message"),
-                    data.getString("image"),
-                    data.getString("url"),
-                    data.getString("which")
-                )
-            }
-        }
-    }
-
-    @Throws(JSONException::class)
-    private fun createNotification(remoteMessage: RemoteMessage) {
-        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val data = JSONObject(remoteMessage.data as Map<*, *>)
-        //Setting up Notification channels for android O and above
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            setupChannels()
-        }
-        val notificationId = Random().nextInt(60000)
-        val defaultSoundUri =
-            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val notificationBuilder =
-            NotificationCompat.Builder(this, ADMIN_CHANNEL_ID)
-                .setSmallIcon(R.drawable.logo) //a resource for your custom small icon
-                .setContentTitle(data.getString("title")) //the "title" value you sent in your notification
-                .setContentText(data.getString("message")) //message
-                .setAutoCancel(true) //dismisses the notification on click
-                .setSound(defaultSoundUri)
-        notificationManager!!.notify(notificationId, notificationBuilder.build())
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private fun setupChannels() {
-        val adminChannelName: CharSequence =
-            getString(R.string.notifications_admin_channel_name)
-        val adminChannelDescription =
-            getString(R.string.notifications_admin_channel_description)
-        val adminChannel: NotificationChannel
-        adminChannel = NotificationChannel(
-            ADMIN_CHANNEL_ID,
-            adminChannelName,
-            NotificationManager.IMPORTANCE_LOW
-        )
-        adminChannel.description = adminChannelDescription
-        adminChannel.enableLights(true)
-        adminChannel.lightColor = Color.RED
-        adminChannel.enableVibration(true)
-        if (notificationManager != null) {
-            notificationManager!!.createNotificationChannel(adminChannel)
-        }
-    }
-
-    private fun goToWebView(
-        context: Context,
-        title: String,
-        message: String,
-        image: String,
-        url: String
-    ) {
-        try {
-            val i = Intent(context, WebViewActivity::class.java)
-            i.putExtra("url", url)
-            i.putExtra("title", title)
-            i.putExtra("option_flag", true)
-            i.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
-            val contentIntent = PendingIntent.getActivity(
-                context,
-                (Math.random() * 100).toInt(),
-                i,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            val notificationBuilder = NotificationCompat.Builder(context, "deeplink")
-                .setContentTitle(title)
-                .setContentText(message)
-                .setLights(Color.BLUE, 500, 500)
-                .setVibrate(pattern)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setLargeIcon(getBitmapfromUrl(image))
-                .setSmallIcon(R.drawable.logo)
-                .setStyle(
-                    NotificationCompat.BigPictureStyle().bigPicture(getBitmapfromUrl(image))
-                        .bigLargeIcon(null)
-                ).setAutoCancel(true)
-            notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationBuilder.setContentIntent(contentIntent)
-            // Since android Oreo notification channel is needed.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                    "deeplink",
-                    "Deep-linking",
-                    NotificationManager.IMPORTANCE_DEFAULT
-                )
-                notificationManager!!.createNotificationChannel(channel)
-            }
-            notificationManager!!.notify(iUniqueId, notificationBuilder.build())
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    fun goToHomePage(
-        context: Context?,
-        title: String?,
-        message: String?,
-        image: String?,
-        pageNo: String?,
-        data: JSONObject
+    /**
+     * Create and show a simple notification containing the received FCM message.
+     */
+    private fun sendNotification(
+        messageBody: String?,
+        image: Bitmap?,
+        which: String?,
+        link: String?,
+        title: String?
     ) {
         try {
-            val notificationIntent = Intent(context, SplashActivity::class.java)
-            notificationIntent.putExtra("notification_data", data.toString())
-            notificationIntent.putExtra("screen", pageNo)
-            notificationIntent.flags = (Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            val contentIntent = PendingIntent.getActivity(
-                context,
-                (Math.random() * 100).toInt(),
-                notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
+            Log.i("Result", "Got the data yessss")
+            val rand = Random()
+            val a = rand.nextInt(101) + 1
+            val intent = Intent(applicationContext, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.putExtra("which", which)
+            intent.putExtra("link", link)
+            intent.putExtra("title", title)
+            val pendingIntent = PendingIntent.getActivity(
+                applicationContext, 0 /* Request code */, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_ONE_SHOT
             )
-            val drivingNotifBldr =
-                NotificationCompat.Builder(context!!, "deeplink")
-                    .setContentTitle(title)
-                    .setContentText(message)
-                    .setLights(Color.BLUE, 500, 500)
-                    .setVibrate(pattern)
-                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                    .setLargeIcon(getBitmapfromUrl(image))
-                    .setSmallIcon(R.drawable.logo)
-                    .setAutoCancel(true)
-            notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            drivingNotifBldr.setContentIntent(contentIntent)
-            // Since android Oreo notification channel is needed.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                    "deeplink",
-                    "Deep-linking",
-                    NotificationManager.IMPORTANCE_DEFAULT
-                )
-                notificationManager!!.createNotificationChannel(channel)
-            }
-            notificationManager!!.notify(iUniqueId, drivingNotifBldr.build())
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun goToActivity(
-        context: Context?,
-        title: String?,
-        message: String?,
-        image: String?,
-        url: String,
-        which: String
-    ) {
-        try {
-            val i = Intent(context, MainActivity::class.java)
-            i.putExtra("which", which)
-            i.putExtra("url", url)
-            i.putExtra("title", title)
-            i.putExtra("option_flag", true)
-            i.flags =
-                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
-
-            val contentIntent = PendingIntent.getActivity(
-                context,
-                (Math.random() * 100).toInt(),
-                i,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            val drivingNotifBldr =
-                NotificationCompat.Builder(context!!, "deeplink")
-                    .setContentTitle(title)
-                    .setContentText(message)
-                    .setLights(Color.BLUE, 500, 500)
-                    .setVibrate(pattern)
-                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                    .setLargeIcon(getBitmapfromUrl(image))
-                    .setSmallIcon(R.drawable.logo)
-                    .setAutoCancel(true)
-            notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            drivingNotifBldr.setContentIntent(contentIntent)
-            // Since android Oreo notification channel is needed.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                    "deeplink",
-                    "Deep-linking",
-                    NotificationManager.IMPORTANCE_DEFAULT
-                )
-                notificationManager!!.createNotificationChannel(channel)
-            }
-            notificationManager!!.notify(iUniqueId, drivingNotifBldr.build())
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    fun goToWebPage(
-        context: Context?,
-        title: String?,
-        message: String?,
-        image: String?,
-        url: String?
-    ) {
-        try {
-            val notificationIntent = Intent(Intent.ACTION_VIEW)
-            notificationIntent.data = Uri.parse(url)
-            notificationIntent.flags =
-                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
-            val contentIntent = PendingIntent.getActivity(
-                context,
-                (Math.random() * 100).toInt(),
-                notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            val drivingNotifBldr =
-                NotificationCompat.Builder(context!!, "deeplink")
-                    .setContentTitle(title)
-                    .setContentText(message)
-                    .setLights(Color.BLUE, 500, 500)
-                    .setVibrate(pattern)
-                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                    .setLargeIcon(getBitmapfromUrl(image))
-                    .setSmallIcon(R.drawable.logo)
+            val defaultSoundUri =
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            val notificationBuilder: NotificationCompat.Builder =
+                NotificationCompat.Builder(applicationContext)
+                    .setLargeIcon(image) /*Notification icon image*/
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle(messageBody)
                     .setStyle(
                         NotificationCompat.BigPictureStyle()
-                            .bigPicture(getBitmapfromUrl(image))
-                            .bigLargeIcon(null)
-                    )
+                            .bigPicture(image)
+                    ) /*Notification with Image*/
                     .setAutoCancel(true)
-            notificationManager =
+                    .setSound(defaultSoundUri)
+                    .setContentIntent(pendingIntent)
+                    .setPriority(Notification.PRIORITY_MAX)
+            val notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            drivingNotifBldr.setContentIntent(contentIntent)
-            // Since android Oreo notification channel is needed.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                    "deeplink",
-                    "Deep-linking",
-                    NotificationManager.IMPORTANCE_DEFAULT
+                // The id of the channel.
+                val id = "messenger_general"
+                val name: CharSequence = "General"
+                val description = "General Notifications sent by the app"
+                val importance = NotificationManager.IMPORTANCE_HIGH
+                val mChannel = NotificationChannel(id, name, importance)
+                mChannel.description = description
+                mChannel.enableLights(true)
+                mChannel.lightColor = Color.BLUE
+                mChannel.enableVibration(true)
+                notificationManager.createNotificationChannel(mChannel)
+                notificationManager.notify(a + 1, notificationBuilder.setChannelId(id).build())
+            } else {
+                notificationManager.notify(
+                    a + 1 /* ID of notification */,
+                    notificationBuilder.build()
                 )
-                notificationManager!!.createNotificationChannel(channel)
             }
-            notificationManager!!.notify(iUniqueId, drivingNotifBldr.build())
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun goToPlaystore(
-        context: Context?,
-        title: String?,
-        message: String?,
-        image: String?,
-        playID: String
-    ) {
-        try {
-            val uri = Uri.parse("market://details?id=$playID")
-            val notificationIntent = Intent(Intent.ACTION_VIEW, uri)
-            notificationIntent.flags =
-                Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
-            val taskStackBuilder =
-                TaskStackBuilder.create(context!!)
-            taskStackBuilder.addNextIntentWithParentStack(notificationIntent)
-            val contentIntent = PendingIntent.getActivity(
-                context,
-                (Math.random() * 100).toInt(),
-                notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            val drivingNotifBldr =
-                NotificationCompat.Builder(context, "deeplink")
-                    .setContentTitle(title)
-                    .setContentText(message)
-                    .setLights(Color.BLUE, 500, 500)
-                    .setVibrate(pattern)
-                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                    .setLargeIcon(getBitmapfromUrl(image))
-                    .setSmallIcon(R.drawable.logo)
-                    .setStyle(
-                        NotificationCompat.BigPictureStyle()
-                            .bigPicture(getBitmapfromUrl(image))
-                            .bigLargeIcon(null)
-                    )
-                    .setAutoCancel(true)
-            notificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            drivingNotifBldr.setContentIntent(contentIntent)
-            // Since android Oreo notification channel is needed.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channel = NotificationChannel(
-                    "deeplink",
-                    "Deep-linking",
-                    NotificationManager.IMPORTANCE_DEFAULT
-                )
-                notificationManager!!.createNotificationChannel(channel)
-            }
-            notificationManager!!.notify(iUniqueId, drivingNotifBldr.build())
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    fun getBitmapfromUrl(imageUrl: String?): Bitmap? {
+    /*
+     *To get a Bitmap image from the URL received
+     * */
+    private fun getBitmapfromUrl(imageUrl: String?): Bitmap? {
         return try {
             val url = URL(imageUrl)
             val connection =
@@ -409,112 +207,14 @@ class MyFirebaseMessaging : FirebaseMessagingService() {
             connection.doInput = true
             connection.connect()
             val input = connection.inputStream
-            val bitmap = BitmapFactory.decodeStream(input)
-            getRoundedCornerBitmap(
-                applicationContext,
-                bitmap,
-                20,
-                bitmap.width,
-                bitmap.height,
-                false,
-                false,
-                false,
-                false
-            )
+            BitmapFactory.decodeStream(input)
         } catch (e: Exception) {
             e.printStackTrace()
             null
         }
     }
 
-    fun getRoundedCornerBitmap(
-        context: Context,
-        input: Bitmap?,
-        pixels: Int,
-        w: Int,
-        h: Int,
-        squareTL: Boolean,
-        squareTR: Boolean,
-        squareBL: Boolean,
-        squareBR: Boolean
-    ): Bitmap {
-        val output = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(output)
-        val densityMultiplier = context.resources.displayMetrics.density
-        val color = -0xbdbdbe
-        val paint = Paint()
-        val rect = Rect(0, 0, w, h)
-        val rectF = RectF(rect)
-        //make sure that our rounded corner is scaled appropriately
-        val roundPx = pixels * densityMultiplier
-        paint.isAntiAlias = true
-        canvas.drawARGB(0, 0, 0, 0)
-        paint.color = color
-        canvas.drawRoundRect(rectF, roundPx, roundPx, paint)
-        //draw rectangles over the corners we want to be square
-        if (squareTL) {
-            canvas.drawRect(0f, 0f, w / 2.toFloat(), h / 2.toFloat(), paint)
-        }
-        if (squareTR) {
-            canvas.drawRect(w / 2.toFloat(), 0f, w.toFloat(), h / 2.toFloat(), paint)
-        }
-        if (squareBL) {
-            canvas.drawRect(0f, h / 2.toFloat(), w / 2.toFloat(), h.toFloat(), paint)
-        }
-        if (squareBR) {
-            canvas.drawRect(w / 2.toFloat(), h / 2.toFloat(), w.toFloat(), h.toFloat(), paint)
-        }
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        canvas.drawBitmap(input!!, 0f, 0f, paint)
-        return output
-    }
-
-    fun isAppIsInBackground(context: Context): Boolean {
-        var isInBackground = true
-        val am =
-            context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-            val runningProcesses =
-                Objects.requireNonNull(am).runningAppProcesses
-            for (processInfo in runningProcesses) {
-                if (processInfo.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
-                    for (activeProcess in processInfo.pkgList) {
-                        if (activeProcess == context.packageName) {
-                            isInBackground = false
-                        }
-                    }
-                }
-            }
-        } else {
-            val taskInfo =
-                Objects.requireNonNull(am).getRunningTasks(1)
-            val componentInfo = taskInfo[0].topActivity
-            if (componentInfo != null && componentInfo.packageName == context.packageName) {
-                isInBackground = false
-            }
-        }
-        return isInBackground
-    }
-
-    //method of running
-    val isActivityRunning: Boolean
-        get() {
-            val activityManager =
-                this.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-            val activitys =
-                activityManager.getRunningTasks(Int.MAX_VALUE)
-            var isActivityFound = false
-            for (i in activitys.indices) {
-                if (activitys[i].topActivity.toString()
-                        .equals("com.appyhigh.utilityapp.MainActivity", ignoreCase = true)
-                ) {
-                    isActivityFound = true
-                }
-            }
-            return isActivityFound
-        }
-
     companion object {
-        private const val TAG = "MyFirebaseMessaging"
+        private const val TAG = "FirebaseMessageService"
     }
 }

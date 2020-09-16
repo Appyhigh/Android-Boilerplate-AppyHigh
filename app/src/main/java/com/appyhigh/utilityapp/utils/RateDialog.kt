@@ -28,7 +28,7 @@ class RateDialog : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        var stars = rating_bar.progressDrawable as LayerDrawable
+        val stars = rating_bar.progressDrawable as LayerDrawable
         stars.getDrawable(2)
             .setColorFilter(resources.getColor(R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP)
         stars.getDrawable(0).setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_ATOP)

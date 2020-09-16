@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         sharedPrefUtil = SharedPrefUtil(this)
         mInterstitialAd = InterstitialAd(this)
-        mInterstitialAd.adUnitId = getString(R.string.main_exit_id)
+        mInterstitialAd.adUnitId = getString(R.string.test_interstitial)
         mInterstitialAd.loadAd(AdRequest.Builder().build())
 
         mInterstitialAd.adListener = object : AdListener() {
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadNativeBannerBig() {
-        val adLoader = AdLoader.Builder(this, getString(R.string.native_id))
+        val adLoader = AdLoader.Builder(this, getString(R.string.test_native_id))
             .forUnifiedNativeAd { unifiedNativeAd: UnifiedNativeAd ->
                 val adView = layoutInflater
                     .inflate(R.layout.layout_nativead_big, null) as UnifiedNativeAdView
@@ -247,7 +247,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadNativeBannerSmall() {
-        val adLoader = AdLoader.Builder(this, getString(R.string.native_id))
+        val adLoader = AdLoader.Builder(this, getString(R.string.test_banner_id))
             .forUnifiedNativeAd { unifiedNativeAd: UnifiedNativeAd ->
                 val adView = layoutInflater
                     .inflate(R.layout.layout_nativead_small, null) as UnifiedNativeAdView
